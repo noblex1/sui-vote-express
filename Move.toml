@@ -1,0 +1,11 @@
+[package]
+name = "simple-voting"
+edition = "2024.beta"
+license = "MIT"
+authors = ["Sui Voting dApp"]
+
+[dependencies]
+Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/testnet" }
+
+[addresses]
+voting = "0x0"

@@ -1,73 +1,273 @@
-# Welcome to your Lovable project
+# Simple Voting dApp on Sui
 
-## Project info
+A production-ready voting decentralized application built on Sui blockchain using Move smart contracts. Users can create polls with multiple options and vote once per address with automatic double-vote prevention.
 
-**URL**: https://lovable.dev/projects/1489b489-2d0a-4489-8884-4229490fc823
+## Features
 
-## How can I edit this code?
+- ✅ Create polls with customizable questions and options
+- ✅ One vote per address enforcement
+- ✅ Real-time vote counting
+- ✅ Event emission for poll creation and voting
+- ✅ Shared object pattern for gas-efficient voting
+- ✅ Comprehensive error handling
+- ✅ Full test coverage
+- ✅ React UI with wallet integration
 
-There are several ways of editing your application.
+## Prerequisites
 
-**Use Lovable**
+- [Sui CLI](https://docs.sui.io/guides/developer/getting-started/sui-install) installed
+- [Rust toolchain](https://rustup.rs/) installed
+- Node.js 18+ (for React UI)
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/1489b489-2d0a-4489-8884-4229490fc823) and start prompting.
+## Quick Start
 
-Changes made via Lovable will be committed automatically to this repo.
+### 1. Build the Move Package
 
-**Use your preferred IDE**
+```bash
+sui move build
+```
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### 2. Run Tests
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+```bash
+sui move test
+```
 
-Follow these steps:
+### 3. Deploy to Testnet
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+First, make sure you have testnet setup and gas coins:
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+```bash
+sui client switch --env testnet
+sui client gas
+```
 
-# Step 3: Install the necessary dependencies.
-npm i
+Deploy the package:
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+```bash
+sui client publish --gas-budget 100000000
+```
+
+**Important**: Save the `Package ID` from the output - you'll need it for all function calls.
+
+### 4. Create a Poll
+
+Replace `<PACKAGE_ID>` with your deployed package ID:
+
+```bash
+sui client call \
+  --package <PACKAGE_ID> \
+  --module voting \
+  --function create_poll \
+  --args "What's the best programming language?" '["Move","Rust","TypeScript","JavaScript"]' \
+  --gas-budget 100000000
+```
+
+**Finding the Poll Object ID**: After creating a poll, look for the transaction effects. The shared object will be listed with type `<PACKAGE_ID>::voting::Poll`. Copy this object ID for voting.
+
+### 5. Vote on a Poll
+
+Replace `<PACKAGE_ID>` and `<POLL_OBJECT_ID>` with your values:
+
+```bash
+sui client call \
+  --package <PACKAGE_ID> \
+  --module voting \
+  --function vote \
+  --args <POLL_OBJECT_ID> 0 \
+  --gas-budget 50000000
+```
+
+The last argument (0) is the option index:
+- 0 = First option ("Move")
+- 1 = Second option ("Rust")  
+- 2 = Third option ("TypeScript")
+- 3 = Fourth option ("JavaScript")
+
+### 6. Test Double-Vote Prevention
+
+Try voting again from the same wallet - it should fail with error code 2:
+
+```bash
+sui client call \
+  --package <PACKAGE_ID> \
+  --module voting \
+  --function vote \
+  --args <POLL_OBJECT_ID> 1 \
+  --gas-budget 50000000
+```
+
+### 7. Vote from Different Wallets
+
+To test with multiple voters, create additional addresses:
+
+```bash
+# Create new address
+sui client new-address ed25519
+
+# Switch to new address  
+sui client switch --address <NEW_ADDRESS>
+
+# Request testnet tokens
+sui client faucet
+
+# Vote from new address
+sui client call \
+  --package <PACKAGE_ID> \
+  --module voting \
+  --function vote \
+  --args <POLL_OBJECT_ID> 1 \
+  --gas-budget 50000000
+```
+
+## Smart Contract Details
+
+### Poll Structure
+
+```move
+public struct Poll has key {
+    id: UID,
+    question: String,
+    options: vector<String>,
+    votes: vector<u64>,
+    voters: vector<address>,
+    creator: address,
+    created_ms: u64,
+}
+```
+
+### Entry Functions
+
+- `create_poll(question: String, options: vector<String>, clock: &Clock, ctx: &mut TxContext)`
+- `vote(poll: &mut Poll, option_index: u64, ctx: &mut TxContext)`
+
+### Error Codes
+
+- **1**: Too few options (minimum 2 required)
+- **2**: Double vote detected (address already voted)
+- **3**: Invalid option index (out of bounds)
+
+### Events
+
+- `PollCreatedEvent`: Emitted when a new poll is created
+- `VotedEvent`: Emitted when someone votes
+
+## React UI
+
+### Setup
+
+```bash
+cd ui
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The UI provides:
+- Wallet connection using @mysten/dapp-kit
+- Create new polls with dynamic option inputs
+- Vote on existing polls by Object ID
+- Real-time transaction status
+- Beautiful responsive design
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Environment Setup
 
-**Use GitHub Codespaces**
+Create `ui/.env.local`:
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```
+VITE_PACKAGE_ID=<YOUR_PACKAGE_ID>
+```
 
-## What technologies are used for this project?
+## Gas Budget Guidelines
 
-This project is built with:
+- **Creating a poll**: 100,000,000 MIST (0.1 SUI)
+- **Voting**: 50,000,000 MIST (0.05 SUI)
+- **Failed transactions**: Usually consume minimal gas
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Troubleshooting
 
-## How can I deploy this project?
+### Common CLI Issues
 
-Simply open [Lovable](https://lovable.dev/projects/1489b489-2d0a-4489-8884-4229490fc823) and click on Share -> Publish.
+1. **"vector<String>" formatting**: Ensure options are in JSON array format: `'["Option1","Option2"]'`
 
-## Can I connect a custom domain to my Lovable project?
+2. **Object not found**: Make sure you're using the correct Poll Object ID from the creation transaction
 
-Yes, you can!
+3. **Insufficient gas**: Increase `--gas-budget` if transactions fail
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+4. **Wrong network**: Verify you're on testnet: `sui client active-env`
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+### Finding Transaction Details
+
+```bash
+# View recent transactions
+sui client transaction-history
+
+# Get transaction details
+sui client show-transaction <TRANSACTION_ID>
+```
+
+### Object Inspection
+
+```bash
+# View poll details
+sui client object <POLL_OBJECT_ID>
+```
+
+## Development
+
+### Project Structure
+
+```
+simple-voting/
+├── Move.toml              # Move package configuration
+├── sources/
+│   └── voting.move        # Main smart contract
+├── tests/
+│   └── voting_tests.move  # Comprehensive test suite
+├── README.md              # This file
+└── ui/                    # React frontend (optional)
+    ├── package.json
+    ├── src/
+    │   ├── App.tsx
+    │   └── components/
+    └── ...
+```
+
+### Running Tests Locally
+
+```bash
+# Run all tests
+sui move test
+
+# Run specific test
+sui move test test_vote_success
+
+# Run tests with coverage
+sui move test --coverage
+```
+
+### Building with Different Networks
+
+```bash
+# Testnet (default)
+sui move build
+
+# Mainnet
+sui move build --release
+```
+
+## Security Considerations
+
+- ✅ Double-vote prevention through address tracking
+- ✅ Bounds checking for option indices  
+- ✅ Proper error handling with descriptive codes
+- ✅ Event emission for transparency
+- ✅ Shared object pattern for efficiency
+- ✅ No admin privileges after creation
+
+## License
+
+MIT License - feel free to use this code for your own projects!
+
+## Contributing
+
+Issues and pull requests welcome! Please ensure all tests pass before submitting.
