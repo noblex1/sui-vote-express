@@ -141,35 +141,36 @@ export function VoteOnPoll() {
             <span>Vote on Poll</span>
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 p-4 sm:p-6">
           <div className="space-y-2">
             <Label htmlFor="pollId">Poll ID</Label>
-            <div className="flex space-x-2">
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
               <Input
                 id="pollId"
                 placeholder="Enter Poll Object ID"
                 value={pollId}
                 onChange={(e) => setPollId(e.target.value)}
-                className="font-mono text-sm"
+                className="font-mono text-xs sm:text-sm flex-1"
               />
               <Button
                 onClick={loadPoll}
                 disabled={isLoading}
                 variant="outline"
-                className="px-4"
+                className="px-4 w-full sm:w-auto justify-center"
               >
                 {isLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader2 className="h-4 w-4 animate-spin mr-2 sm:mr-0" />
                 ) : (
-                  <Search className="h-4 w-4" />
+                  <Search className="h-4 w-4 mr-2 sm:mr-0" />
                 )}
+                <span className="sm:hidden">Load Poll</span>
               </Button>
             </div>
           </div>
 
           {PACKAGE_ID === "0x0" && (
-            <div className="p-4 bg-warning/10 border border-warning/20 rounded-lg">
-              <p className="text-sm text-warning-foreground">
+            <div className="p-3 sm:p-4 bg-warning/10 border border-warning/20 rounded-lg">
+              <p className="text-xs sm:text-sm text-warning-foreground leading-relaxed">
                 ⚠️ <strong>Setup Required:</strong> Update the PACKAGE_ID in VoteOnPoll.tsx with your deployed package ID to enable voting.
               </p>
             </div>
@@ -185,12 +186,14 @@ export function VoteOnPoll() {
               <span>Poll Details</span>
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-4 sm:space-y-6 p-4 sm:p-6">
             <div>
-              <h3 className="text-lg font-semibold mb-2">{pollData.question}</h3>
-              <p className="text-sm text-muted-foreground">
-                Total votes: {totalVotes} • Created by: {pollData.creator.slice(0, 8)}...
-              </p>
+              <h3 className="text-base sm:text-lg font-semibold mb-2 leading-tight">{pollData.question}</h3>
+              <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 text-xs sm:text-sm text-muted-foreground">
+                <span>Total votes: {totalVotes}</span>
+                <span className="hidden sm:inline mx-2">•</span>
+                <span>Created by: {pollData.creator.slice(0, 8)}...</span>
+              </div>
             </div>
 
             <div className="space-y-4">
@@ -201,24 +204,30 @@ export function VoteOnPoll() {
                   
                   return (
                     <div key={index} className="space-y-2">
-                      <div className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-secondary/50 transition-colors">
-                        <RadioGroupItem value={index.toString()} id={`option-${index}`} />
-                        <Label
-                          htmlFor={`option-${index}`}
-                          className="flex-1 cursor-pointer font-medium"
-                        >
-                          {option}
-                        </Label>
-                        <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                      <div className="flex items-start sm:items-center space-x-3 p-3 rounded-lg border hover:bg-secondary/50 transition-colors">
+                        <RadioGroupItem value={index.toString()} id={`option-${index}`} className="mt-0.5 sm:mt-0" />
+                        <div className="flex-1 min-w-0">
+                          <Label
+                            htmlFor={`option-${index}`}
+                            className="cursor-pointer font-medium text-sm sm:text-base leading-tight block"
+                          >
+                            {option}
+                          </Label>
+                          <div className="flex items-center space-x-2 text-xs sm:text-sm text-muted-foreground mt-1 sm:hidden">
+                            <span>{voteCount} votes</span>
+                            <span>({percentage.toFixed(1)}%)</span>
+                          </div>
+                        </div>
+                        <div className="hidden sm:flex items-center space-x-2 text-sm text-muted-foreground">
                           <span>{voteCount} votes</span>
                           <span>({percentage.toFixed(1)}%)</span>
                         </div>
                       </div>
                       
                       {totalVotes > 0 && (
-                        <div className="ml-6 w-full bg-secondary rounded-full h-2">
+                        <div className="ml-6 sm:ml-8 w-full bg-secondary rounded-full h-1.5 sm:h-2">
                           <div
-                            className={`vote-option-${index} h-2 rounded-full transition-all duration-500 ease-out`}
+                            className={`vote-option-${index} h-1.5 sm:h-2 rounded-full transition-all duration-500 ease-out`}
                             style={{ width: `${percentage}%` }}
                           />
                         </div>
@@ -231,7 +240,7 @@ export function VoteOnPoll() {
               <Button
                 onClick={vote}
                 disabled={isVoting || !selectedOption}
-                className="w-full bg-gradient-primary text-primary-foreground hover:opacity-90 glow-primary"
+                className="w-full bg-gradient-primary text-primary-foreground hover:opacity-90 glow-primary py-3 sm:py-4"
                 size="lg"
               >
                 {isVoting ? (

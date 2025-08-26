@@ -104,7 +104,7 @@ export function CreatePoll() {
           <span>Create New Poll</span>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-4 sm:space-y-6 p-4 sm:p-6">
         <div className="space-y-2">
           <Label htmlFor="question">Poll Question</Label>
           <Textarea
@@ -112,29 +112,32 @@ export function CreatePoll() {
             placeholder="What's your question? e.g., What's the best programming language?"
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
-            className="min-h-[80px] resize-none"
+            className="min-h-[80px] sm:min-h-[100px] resize-none text-sm sm:text-base"
           />
         </div>
 
         <div className="space-y-4">
           <Label>Poll Options</Label>
           {options.map((option, index) => (
-            <div key={index} className="flex items-center space-x-2">
-              <div className={`w-4 h-4 rounded-full vote-option-${index} flex-shrink-0`} />
-              <Input
-                placeholder={`Option ${index + 1}`}
-                value={option}
-                onChange={(e) => updateOption(index, e.target.value)}
-                className="flex-1"
-              />
+            <div key={index} className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
+              <div className="flex items-center space-x-2 w-full sm:flex-1">
+                <div className={`w-4 h-4 rounded-full vote-option-${index} flex-shrink-0`} />
+                <Input
+                  placeholder={`Option ${index + 1}`}
+                  value={option}
+                  onChange={(e) => updateOption(index, e.target.value)}
+                  className="flex-1 text-sm sm:text-base"
+                />
+              </div>
               {options.length > 2 && (
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => removeOption(index)}
-                  className="text-destructive hover:text-destructive-foreground hover:bg-destructive"
+                  className="text-destructive hover:text-destructive-foreground hover:bg-destructive w-full sm:w-auto justify-center sm:justify-start"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-4 w-4 sm:mr-0 mr-2" />
+                  <span className="sm:hidden">Remove Option</span>
                 </Button>
               )}
             </div>
@@ -144,10 +147,10 @@ export function CreatePoll() {
             <Button
               variant="outline"
               onClick={addOption}
-              className="w-full border-dashed hover:bg-primary/5"
+              className="w-full border-dashed hover:bg-primary/5 py-2 sm:py-3"
             >
               <Plus className="mr-2 h-4 w-4" />
-              Add Option
+              <span className="text-sm sm:text-base">Add Option</span>
             </Button>
           )}
         </div>
@@ -155,7 +158,7 @@ export function CreatePoll() {
         <Button
           onClick={createPoll}
           disabled={isCreating}
-          className="w-full bg-gradient-primary text-primary-foreground hover:opacity-90 glow-primary"
+          className="w-full bg-gradient-primary text-primary-foreground hover:opacity-90 glow-primary py-3 sm:py-4"
           size="lg"
         >
           {isCreating ? (
@@ -172,8 +175,8 @@ export function CreatePoll() {
         </Button>
 
         {PACKAGE_ID === "0x0" && (
-          <div className="p-4 bg-warning/10 border border-warning/20 rounded-lg">
-            <p className="text-sm text-warning-foreground">
+          <div className="p-3 sm:p-4 bg-warning/10 border border-warning/20 rounded-lg">
+            <p className="text-xs sm:text-sm text-warning-foreground leading-relaxed">
               ⚠️ <strong>Setup Required:</strong> Update the PACKAGE_ID in CreatePoll.tsx with your deployed package ID to enable poll creation.
             </p>
           </div>
